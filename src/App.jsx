@@ -111,24 +111,29 @@ function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [handleMove])
 
-  // 触屏滑动
-  const touchStart = useRef(null)
-  const onTouchStart = (e) => {
-    const t = e.touches[0]
-    touchStart.current = { x: t.clientX, y: t.clientY }
+  // 鼠标 / 触屏 / 手写笔统一用 Pointer Events 识别滑动
+  const swipeStart = useRef(null)
+
+  const onPointerDown = (e) => {
+    if (e.button !== 0) return // 只响应鼠标左键 / 触摸 / 笔
+    swipeStart.current = { x: e.clientX, y: e.clientY }
   }
-  const onTouchEnd = (e) => {
-    if (!touchStart.current) return
-    const t = e.changedTouches[0]
-    const dx = t.clientX - touchStart.current.x
-    const dy = t.clientY - touchStart.current.y
-    touchStart.current = null
+
+  const onPointerUp = (e) => {
+    if (!swipeStart.current) return
+    const dx = e.clientX - swipeStart.current.x
+    const dy = e.clientY - swipeStart.current.y
+    swipeStart.current = null
     if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) return
     if (Math.abs(dx) > Math.abs(dy)) {
       handleMove(dx > 0 ? 'right' : 'left')
     } else {
       handleMove(dy > 0 ? 'down' : 'up')
     }
+  }
+
+  const onPointerCancel = () => {
+    swipeStart.current = null
   }
 
   const tiles = flattenTiles(grid)
@@ -160,10 +165,15 @@ function App() {
         <button className="btn" onClick={newGame}>
           新游戏
         </button>
-        <div className="legend">方向键 / WASD · 或滑动屏幕</div>
+        <div className="legend">方向键 / WASD · 或鼠标 / 手指滑动</div>
       </div>
 
-      <div className="board" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <div
+        className="board"
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
+      >
         <div className="grid">
           {Array.from({ length: 16 }).map((_, i) => (
             <div className="cell" key={i} />

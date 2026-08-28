@@ -127,6 +127,8 @@ body {
   background: #bbada0;
   border-radius: 10px;
   touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .grid {

@@ -513,7 +513,7 @@ body {
 .script-area {
   width: 100%;
   flex: 1;
-  min-height: 260px;
+  min-height: 140px;
   resize: vertical;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
   font-size: 12.5px;

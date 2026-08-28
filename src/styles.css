@@ -24,7 +24,7 @@ body {
 .layout {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 0;
   padding: 24px 16px 40px;
 }
@@ -42,11 +42,16 @@ body {
 }
 
 /* 右侧脚本栏：折叠时宽度 0；展开时滑入，整体始终居中 */
+/* 用 margin-top/底部让面板顶部对齐“得分/最高”、底部对齐棋盘底 */
 .s-col {
   flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
   width: 0;
   overflow: hidden;
   opacity: 0;
+  margin-top: 24px;
+  margin-bottom: 40px;
   transition: width 0.35s ease, opacity 0.35s ease;
 }
 
@@ -57,7 +62,7 @@ body {
 
 .head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
 }
@@ -381,6 +386,10 @@ body {
   background: #eee4da;
   border-radius: 10px;
   padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .panel-head {
@@ -470,6 +479,8 @@ body {
   flex-direction: column;
   gap: 10px;
   margin-top: 12px;
+  flex: 1;
+  min-height: 0;
 }
 
 .hint-line {
@@ -501,7 +512,8 @@ body {
 
 .script-area {
   width: 100%;
-  min-height: 220px;
+  flex: 1;
+  min-height: 260px;
   resize: vertical;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
   font-size: 12.5px;
@@ -526,6 +538,7 @@ body {
 
 .log-wrap {
   margin-top: 12px;
+  flex: 0 0 auto;
 }
 
 .log-head {
@@ -542,7 +555,7 @@ body {
 }
 
 .log-area {
-  max-height: 200px;
+  height: 200px;
   overflow-y: auto;
   background: #fff;
   border: 1px solid #d8cdc0;
@@ -577,6 +590,8 @@ body {
   .s-col {
     width: var(--colw);
     max-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     transition: max-height 0.35s ease, opacity 0.35s ease;
   }
   .s-col.open {
@@ -584,6 +599,11 @@ body {
   }
   .s-col .panel {
     margin: 16px 0 0 0;
+    flex: none;
+  }
+  .panel-body,
+  .script-area {
+    flex: none;
   }
 }
 

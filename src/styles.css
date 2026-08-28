@@ -201,15 +201,18 @@ body {
   pointer-events: none;
 }
 
-.tile-128,
-.tile-256,
-.tile-512 {
+/* 按数字位数统一定字号：位数越多字号越小 */
+.tile-f3 {
   font-size: calc(var(--cell) * 0.42);
 }
-
-.tile-1024,
-.tile-2048 {
+.tile-f4 {
   font-size: calc(var(--cell) * 0.34);
+}
+.tile-f5 {
+  font-size: calc(var(--cell) * 0.28);
+}
+.tile-f6 {
+  font-size: calc(var(--cell) * 0.24);
 }
 
 .tile-2 {
@@ -255,6 +258,30 @@ body {
 .tile-2048 {
   background: #edc22e;
   color: #f9f6f2;
+}
+.tile-4096 {
+  background: #edc53f;
+  color: #f9f6f2;
+}
+.tile-8192 {
+  background: #edc850;
+  color: #f9f6f2;
+}
+.tile-16384 {
+  background: #edcf72;
+  color: #f9f6f2;
+}
+.tile-32768 {
+  background: #eddda0;
+  color: #f9f6f2;
+}
+.tile-65536 {
+  background: #eee4da;
+  color: #776e65;
+}
+.tile-131072 {
+  background: #eee4da;
+  color: #776e65;
 }
 
 .tile-new {

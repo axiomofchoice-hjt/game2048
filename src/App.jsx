@@ -135,12 +135,12 @@ function move(board) {
     return true;
   }
 
-  // 权重矩阵：引导最大块进入左上角，整体沿“蛇形”递减
+  // 蛇形权重矩阵：最大块进左上角，并沿“蛇形路径”递减（行内/行间来回走向）
   const W = [
     [65536, 32768, 16384, 8192],
-    [32768, 16384, 8192, 4096],
-    [16384, 8192, 4096, 2048],
-    [8192, 4096, 2048, 1024]
+    [512, 1024, 2048, 4096],
+    [256, 128, 64, 32],
+    [2, 4, 8, 16]
   ];
 
   function evaluate(g) {
@@ -433,9 +433,9 @@ function App() {
             {tiles.map((t) => (
               <div
                 key={t.id}
-                className={`tile tile-${t.value}${t.isNew ? ' tile-new' : ''}${
-                  t.merged ? ' tile-merged' : ''
-                }`}
+                className={`tile tile-${t.value} tile-f${String(t.value).length}${
+                  t.isNew ? ' tile-new' : ''
+                }${t.merged ? ' tile-merged' : ''}`}
                 style={{ '--row': t.row, '--col': t.col }}
               >
                 <span className="tile-inner">{t.value}</span>

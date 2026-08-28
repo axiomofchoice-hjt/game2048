@@ -1,0 +1,313 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #faf8ef;
+  color: #776e65;
+  font-family: 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei',
+    sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px 20px 40px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.title {
+  font-size: 64px;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1;
+  color: #776e65;
+}
+
+.scores {
+  display: flex;
+  gap: 8px;
+}
+
+.score-box {
+  background: #bbada0;
+  color: #eee4da;
+  border-radius: 6px;
+  padding: 6px 12px;
+  min-width: 62px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.score-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #eee4da;
+}
+
+.score-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.intro {
+  margin: 12px 0;
+  font-size: 16px;
+  color: #776e65;
+}
+
+.intro strong {
+  color: #776e65;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.legend {
+  font-size: 13px;
+  color: #a99b8f;
+}
+
+.btn {
+  font: inherit;
+  font-weight: 700;
+  font-size: 15px;
+  color: #f9f6f2;
+  background: #8f7a66;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.btn:hover {
+  background: #7f6a56;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn-primary {
+  padding: 12px 22px;
+  font-size: 17px;
+}
+
+/* ---------- 棋盘 ---------- */
+.board {
+  --cell: 106px;
+  --gap: 12px;
+  position: relative;
+  width: calc(var(--gap) * 5 + var(--cell) * 4);
+  height: calc(var(--gap) * 5 + var(--cell) * 4);
+  background: #bbada0;
+  border-radius: 10px;
+  touch-action: none;
+}
+
+.grid {
+  position: absolute;
+  inset: var(--gap);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: var(--gap);
+}
+
+.cell {
+  background: rgba(238, 228, 218, 0.35);
+  border-radius: 6px;
+}
+
+/* ---------- 方块 ---------- */
+.tile {
+  position: absolute;
+  width: var(--cell);
+  height: var(--cell);
+  left: calc(var(--gap) + var(--col) * (var(--cell) + var(--gap)));
+  top: calc(var(--gap) + var(--row) * (var(--cell) + var(--gap)));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: calc(var(--cell) * 0.5);
+  color: #776e65;
+  border-radius: 6px;
+  user-select: none;
+  transition: left 0.12s ease-in-out, top 0.12s ease-in-out;
+  z-index: 1;
+}
+
+.tile-inner {
+  pointer-events: none;
+}
+
+.tile-128,
+.tile-256,
+.tile-512 {
+  font-size: calc(var(--cell) * 0.42);
+}
+
+.tile-1024,
+.tile-2048 {
+  font-size: calc(var(--cell) * 0.34);
+}
+
+.tile-2 {
+  background: #eee4da;
+  color: #776e65;
+}
+.tile-4 {
+  background: #ede0c8;
+  color: #776e65;
+}
+.tile-8 {
+  background: #f2b179;
+  color: #f9f6f2;
+}
+.tile-16 {
+  background: #f59563;
+  color: #f9f6f2;
+}
+.tile-32 {
+  background: #f67c5f;
+  color: #f9f6f2;
+}
+.tile-64 {
+  background: #f65e3b;
+  color: #f9f6f2;
+}
+.tile-128 {
+  background: #edcf72;
+  color: #f9f6f2;
+}
+.tile-256 {
+  background: #edcc61;
+  color: #f9f6f2;
+}
+.tile-512 {
+  background: #edc850;
+  color: #f9f6f2;
+}
+.tile-1024 {
+  background: #edc53f;
+  color: #f9f6f2;
+}
+.tile-2048 {
+  background: #edc22e;
+  color: #f9f6f2;
+}
+
+.tile-new {
+  animation: appear 0.2s ease;
+}
+
+.tile-merged {
+  animation: pop 0.22s ease;
+}
+
+@keyframes appear {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ---------- 结束/胜利遮罩 ---------- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(238, 228, 218, 0.73);
+  border-radius: 10px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  animation: fade-in 0.3s ease;
+}
+
+.overlay-text {
+  font-size: 34px;
+  font-weight: 800;
+  color: #776e65;
+}
+
+.overlay-sub {
+  font-size: 16px;
+  color: #776e65;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- 小屏适配 ---------- */
+@media (max-width: 480px) {
+  .board {
+    --cell: 74px;
+    --gap: 10px;
+  }
+  .game {
+    padding: 16px 12px 24px;
+  }
+  .title {
+    font-size: 48px;
+  }
+  .intro {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .board {
+    --cell: 62px;
+    --gap: 8px;
+  }
+}

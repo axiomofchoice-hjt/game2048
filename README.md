@@ -41,6 +41,7 @@ return Math.random() < 0.5 ? 'left' : 'right'
 ```
 src/
   game.js      # 纯函数核心逻辑（滑动、合并、生成、胜负判断）
+  bot.js       # 自动玩 AI 脚本：编译校验、默认 expectimax 示例
   App.jsx      # 组件：状态、键盘/触屏事件、UI 渲染
   main.jsx     # 入口
   styles.css   # 样式与动画

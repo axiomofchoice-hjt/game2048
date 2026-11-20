@@ -1,17 +1,32 @@
 // 自动玩 AI 脚本：编译、快捷校验与默认示例
 // 与 React 解耦，独立成文件，便于和组件分开维护。
 
-const VALID_DIRS = ['up', 'down', 'left', 'right']
+import type { Direction, Grid } from './game'
+
+export const VALID_DIRS = ['up', 'down', 'left', 'right'] as const
+
+/** 脚本运行函数：入参为数字棋盘，返回原始方向字符串 */
+export type BotRun = (board: number[][]) => string | null
+
+/** 编译结果：run 为 null 表示脚本不可用，error 说明原因 */
+export interface Bot {
+  run: BotRun | null
+  error: string | null
+}
+
+function isDirection(value: string): value is Direction {
+  return (VALID_DIRS as readonly string[]).includes(value)
+}
 
 /** 把脚本返回值规范为一条合法的移动方向 */
-export function normalizeDir(r) {
+export function normalizeDir(r: unknown): Direction | null {
   if (typeof r !== 'string') return null
   const d = r.trim().toLowerCase()
-  return VALID_DIRS.includes(d) ? d : null
+  return isDirection(d) ? d : null
 }
 
 /** 把 tile 棋盘转为数字数组（0 表示空格），供脚本读取与日志展示 */
-export function gridToArray(grid) {
+export function gridToArray(grid: Grid): number[][] {
   return grid.map((row) => row.map((t) => (t ? t.value : 0)))
 }
 
@@ -23,26 +38,25 @@ export function gridToArray(grid) {
  *
  * 用一个工厂函数同时覆盖两种写法：若脚本声明了 move / bot，则返回它并调用；
  * 否则直接执行脚本体，把返回值当作方向。
- * @returns {{ run: (board)=>string|null, error?: string }}
  */
-export function makeBot(script) {
+export function makeBot(script: string): Bot {
   const trimmed = (script || '').trim()
   if (!trimmed) return { run: null, error: '脚本为空' }
 
-  let factory
+  let factory: (board: number[][]) => unknown
   try {
     factory = new Function(
       'board',
       `"use strict";\n${trimmed}\n;return (typeof move==='function'?move:(typeof bot==='function'?bot:null));`,
-    )
+    ) as (board: number[][]) => unknown
   } catch (e) {
-    return { run: null, error: String((e && e.message) || e) }
+    return { run: null, error: e instanceof Error ? e.message : String(e) }
   }
 
   return {
     run: (board) => {
       const r = factory(board)
-      const result = typeof r === 'function' ? r(board) : r
+      const result = typeof r === 'function' ? (r as BotRun)(board) : r
       return typeof result === 'string' ? result : null
     },
     error: null,

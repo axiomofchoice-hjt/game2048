@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import {
   createInitialBoard,
   move,
@@ -6,10 +7,12 @@ import {
   isWin,
   canMove,
   flattenTiles,
-} from './game.js'
-import { normalizeDir, gridToArray, makeBot, DEFAULT_SCRIPT } from './bot.js'
+} from './game'
+import type { Direction, Grid } from './game'
+import { normalizeDir, gridToArray, makeBot, DEFAULT_SCRIPT } from './bot'
+import type { BotRun } from './bot'
 
-const KEY_TO_DIR = {
+const KEY_TO_DIR: Record<string, Direction> = {
   ArrowUp: 'up',
   ArrowDown: 'down',
   ArrowLeft: 'left',
@@ -26,16 +29,30 @@ const KEY_TO_DIR = {
 
 const BEST_KEY = 'game2048.bestScore'
 
-function readBest() {
+type Status = 'playing' | 'won' | 'lost'
+
+interface LogEntry {
+  text: string
+  ok: boolean
+}
+
+/** 方块定位用的 CSS 自定义属性 */
+type TileStyle = CSSProperties & { '--row': number; '--col': number }
+
+function readBest(): number {
   const v = Number(localStorage.getItem(BEST_KEY))
   return Number.isFinite(v) ? v : 0
 }
 
+function errorMessage(e: unknown): string {
+  return e instanceof Error ? e.message : String(e)
+}
+
 function App() {
-  const [grid, setGrid] = useState(createInitialBoard)
+  const [grid, setGrid] = useState<Grid>(createInitialBoard)
   const [score, setScore] = useState(0)
   const [best, setBest] = useState(readBest)
-  const [status, setStatus] = useState('playing') // 'playing' | 'won' | 'lost'
+  const [status, setStatus] = useState<Status>('playing')
   const [keepPlaying, setKeepPlaying] = useState(false)
 
   // 脚本 / 自动玩相关状态
@@ -43,23 +60,17 @@ function App() {
   const [expanded, setExpanded] = useState(false)
   const [auto, setAuto] = useState(false)
   const [speed, setSpeed] = useState(10) // 1..20
-  const [log, setLog] = useState([]) // 每行 { text, ok }
-  const logRef = useRef(null)
+  const [log, setLog] = useState<LogEntry[]>([])
+  const logRef = useRef<HTMLDivElement>(null)
 
   const bot = useMemo(() => makeBot(script), [script])
-  const botRunRef = useRef(bot.run)
+  const botRunRef = useRef<BotRun | null>(bot.run)
   useEffect(() => {
     botRunRef.current = bot.run
   }, [bot])
 
-  const toggleAuto = useCallback((on) => {
-    setAuto(on)
-    keepRef.current = on
-    setKeepPlaying(on) // 自动玩期间不弹出胜利遮罩
-  }, [])
-
   // 用 ref 保存最新值，避免在 setState 更新函数里产生副作用
-  const gridRef = useRef(grid)
+  const gridRef = useRef<Grid>(grid)
   const scoreRef = useRef(0)
   const keepRef = useRef(false)
   const bestRef = useRef(best)
@@ -71,7 +82,13 @@ function App() {
     bestRef.current = best
   }, [grid, score, keepPlaying, best])
 
-  const handleMove = useCallback((dir) => {
+  const toggleAuto = useCallback((on: boolean) => {
+    setAuto(on)
+    keepRef.current = on
+    setKeepPlaying(on) // 自动玩期间不弹出胜利遮罩
+  }, [])
+
+  const handleMove = useCallback((dir: Direction) => {
     const prev = gridRef.current
     const { grid: next, moved, score: gained } = move(prev, dir)
     if (!moved) return
@@ -115,14 +132,14 @@ function App() {
   }, [])
 
   // 日志：只保留最近 256 行
-  const logLine = useCallback((entry) => {
+  const logLine = useCallback((entry: LogEntry) => {
     setLog((prev) => [...prev, entry].slice(-256))
   }, [])
 
   const clearLog = useCallback(() => setLog([]), [])
 
   // 严格模式下运行一步：入参 board，回调结果必须为合法方向且真正改变棋盘
-  const step = useCallback(() => {
+  const step = useCallback((): boolean => {
     const prev = gridRef.current
     const board = gridToArray(prev)
     const input = JSON.stringify(board)
@@ -131,11 +148,11 @@ function App() {
       logLine({ text: `${input} -> 脚本未就绪`, ok: false })
       return false
     }
-    let raw = null
+    let raw: unknown
     try {
       raw = runBot(board)
     } catch (e) {
-      logLine({ text: `${input} -> 脚本异常：${(e && e.message) || e}`, ok: false })
+      logLine({ text: `${input} -> 脚本异常：${errorMessage(e)}`, ok: false })
       return false
     }
     const dir = normalizeDir(raw)
@@ -164,7 +181,7 @@ function App() {
 
   // 键盘控制
   useEffect(() => {
-    const onKey = (e) => {
+    const onKey = (e: KeyboardEvent) => {
       const dir = KEY_TO_DIR[e.key]
       if (!dir) return
       e.preventDefault()
@@ -186,14 +203,14 @@ function App() {
   }, [auto, speed, step])
 
   // 鼠标 / 触屏 / 手写笔统一用 Pointer Events 识别滑动
-  const swipeStart = useRef(null)
+  const swipeStart = useRef<{ x: number; y: number } | null>(null)
 
-  const onPointerDown = (e) => {
+  const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return // 只响应鼠标左键 / 触摸 / 笔
     swipeStart.current = { x: e.clientX, y: e.clientY }
   }
 
-  const onPointerUp = (e) => {
+  const onPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!swipeStart.current) return
     const dx = e.clientX - swipeStart.current.x
     const dy = e.clientY - swipeStart.current.y
@@ -265,7 +282,7 @@ function App() {
                 className={`tile tile-${t.value} tile-f${String(t.value).length}${
                   t.isNew ? ' tile-new' : ''
                 }${t.merged ? ' tile-merged' : ''}`}
-                style={{ '--row': t.row, '--col': t.col }}
+                style={{ '--row': t.row, '--col': t.col } as TileStyle}
               >
                 <span className="tile-inner">{t.value}</span>
               </div>

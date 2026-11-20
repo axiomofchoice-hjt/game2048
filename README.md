@@ -1,6 +1,6 @@
-# 2048 · React 复刻
+# 2048 · React + TypeScript 复刻
 
-使用 **React + Vite** 复刻的经典 2048 小游戏。
+使用 **React + TypeScript + Vite** 复刻的经典 2048 小游戏。
 
 ## 功能
 
@@ -40,20 +40,24 @@ return Math.random() < 0.5 ? 'left' : 'right'
 
 ```
 src/
-  game.js      # 纯函数核心逻辑（滑动、合并、生成、胜负判断）
-  bot.js       # 自动玩 AI 脚本：编译校验、默认 expectimax 示例
-  App.jsx      # 组件：状态、键盘/触屏事件、UI 渲染
-  main.jsx     # 入口
-  styles.css   # 样式与动画
+  game.ts        # 纯函数核心逻辑（滑动、合并、生成、胜负判断）与类型定义
+  bot.ts         # 自动玩 AI 脚本：编译校验、默认 expectimax 示例
+  App.tsx        # 组件：状态、键盘/触屏事件、UI 渲染
+  main.tsx       # 入口
+  vite-env.d.ts  # Vite 类型声明
+  styles.css     # 样式与动画
+tsconfig.json    # TypeScript 配置（strict + noUncheckedIndexedAccess）
+vite.config.ts   # Vite 配置
 ```
 
 ## 使用
 
 ```bash
 npm install     # 安装依赖
-npm run dev     # 启动开发服务器（http://localhost:5173）
-npm run build   # 构建生产包到 dist/
-npm run preview # 预览生产构建
+npm run dev       # 启动开发服务器（http://localhost:5173）
+npm run typecheck # 仅做 TypeScript 类型检查
+npm run build     # 类型检查 + 构建生产包到 dist/
+npm run preview   # 预览生产构建
 ```
 
 ## 规则简述
